@@ -1,0 +1,103 @@
+/* GitHub Floating Buttons — 콘텐트 스크립트 UI 스타일 */
+
+#gfb-container {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 2147483000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+#gfb-container .gfb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid rgba(27, 31, 36, 0.15);
+  border-radius: 50%;
+  background-color: #ffffff;
+  color: #24292f;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(27, 31, 36, 0.12), 0 8px 24px rgba(66, 74, 83, 0.12);
+  transition: transform 0.12s ease, background-color 0.12s ease, box-shadow 0.12s ease;
+  position: relative;
+}
+
+#gfb-container .gfb-btn:hover {
+  background-color: #f3f4f6;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(27, 31, 36, 0.18), 0 10px 28px rgba(66, 74, 83, 0.16);
+}
+
+#gfb-container .gfb-btn:active {
+  transform: translateY(0);
+}
+
+#gfb-container .gfb-btn svg {
+  display: block;
+}
+
+/* hover 툴팁 (label) */
+#gfb-container .gfb-btn::after {
+  content: attr(data-label);
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  background-color: #24292f;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+#gfb-container .gfb-btn:hover::after {
+  opacity: 1;
+}
+
+/* 다크 모드 대응 (GitHub의 color-mode 속성 기준) */
+[data-color-mode="dark"] #gfb-container .gfb-btn,
+[data-color-mode="auto"][data-dark-theme] #gfb-container .gfb-btn {
+  background-color: #21262d;
+  color: #c9d1d9;
+  border-color: rgba(240, 246, 252, 0.1);
+}
+
+[data-color-mode="dark"] #gfb-container .gfb-btn:hover {
+  background-color: #30363d;
+}
+
+/* 토스트 알림 */
+#gfb-toast {
+  position: fixed;
+  right: 20px;
+  bottom: 78px;
+  z-index: 2147483001;
+  max-width: 280px;
+  background-color: #24292f;
+  color: #ffffff;
+  font-size: 13px;
+  line-height: 1.4;
+  padding: 10px 12px;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(66, 74, 83, 0.2);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  pointer-events: none;
+}
+
+#gfb-toast.gfb-toast-show {
+  opacity: 1;
+  transform: translateY(0);
+}
