@@ -57,6 +57,27 @@ icons/                         # 16/48/128 아이콘
 - Enterprise 호스트는 `optional_host_permissions` + `chrome.scripting`
   `registerContentScripts` 로 런타임에 등록/해제됩니다.
 
+## 권한
+
+이 확장이 요청하는 권한과 이유입니다. 외부로 전송되는 데이터는 전혀 없습니다.
+
+| 권한 | 용도 |
+| --- | --- |
+| `storage` | 버튼 on/off·순서, 리뷰 설정, Enterprise 호스트 목록 등 환경설정 저장 |
+| `scripting` | 사용자가 추가한 Enterprise 호스트에 버튼 스크립트를 런타임 등록 |
+| `host_permissions: https://github.com/*` | github.com 페이지에 버튼 주입 |
+| `optional_host_permissions: https://*/*` | **기본 미부여.** 사용자가 옵션에서 Enterprise 호스트를 직접 추가할 때만 해당 도메인 권한을 개별 요청. 임의 사이트에 자동 접근하지 않음 |
+
+> Enterprise 도메인은 사전에 알 수 없으므로 선택적 host 권한에 broad 패턴
+> (`https://*/*`)을 선언하지만, 실제 부여는 사용자가 추가한 호스트에 한해서만
+> 일어납니다.
+
+## 개인정보 / 웹스토어
+
+- 개인정보 처리방침: [PRIVACY.md](./PRIVACY.md) — 개인정보·사용 데이터를 수집하지
+  않으며 외부 전송이 없습니다.
+- Chrome 웹스토어 제출 가이드(체크리스트·정당화 문구): [STORE.md](./STORE.md)
+
 ## 주의
 
 - GitHub 의 DOM 구조 변경 시 "리뷰창 열기"의 셀렉터가 맞지 않을 수 있습니다.
