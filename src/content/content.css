@@ -65,6 +65,74 @@
   opacity: 1;
 }
 
+/* 그룹 버튼 (알약 형태) */
+#gfb-container .gfb-btn-group {
+  display: flex;
+  flex-direction: column;
+  width: 44px;
+  border-radius: 22px;
+  border: 1px solid rgba(27, 31, 36, 0.15);
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(27, 31, 36, 0.12), 0 8px 24px rgba(66, 74, 83, 0.12);
+  overflow: hidden;
+}
+
+#gfb-container .gfb-btn-group-divider {
+  height: 1px;
+  background-color: rgba(27, 31, 36, 0.12);
+  margin: 0 8px;
+  flex-shrink: 0;
+}
+
+#gfb-container .gfb-group-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #24292f;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.12s ease;
+}
+
+#gfb-container .gfb-group-btn:hover {
+  background-color: #f3f4f6;
+}
+
+#gfb-container .gfb-group-btn:active {
+  background-color: #eaeef2;
+}
+
+#gfb-container .gfb-group-btn svg {
+  display: block;
+}
+
+#gfb-container .gfb-group-btn::after {
+  content: attr(data-label);
+  position: absolute;
+  right: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  background-color: #24292f;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+#gfb-container .gfb-group-btn:hover::after {
+  opacity: 1;
+}
+
 /* 다크 모드 대응 (GitHub의 color-mode 속성 기준) */
 [data-color-mode="dark"] #gfb-container .gfb-btn,
 [data-color-mode="auto"][data-dark-theme] #gfb-container .gfb-btn {
@@ -73,7 +141,29 @@
   border-color: rgba(240, 246, 252, 0.1);
 }
 
-[data-color-mode="dark"] #gfb-container .gfb-btn:hover {
+[data-color-mode="dark"] #gfb-container .gfb-btn:hover,
+[data-color-mode="auto"][data-dark-theme] #gfb-container .gfb-btn:hover {
+  background-color: #30363d;
+}
+
+[data-color-mode="dark"] #gfb-container .gfb-btn-group,
+[data-color-mode="auto"][data-dark-theme] #gfb-container .gfb-btn-group {
+  background-color: #21262d;
+  border-color: rgba(240, 246, 252, 0.1);
+}
+
+[data-color-mode="dark"] #gfb-container .gfb-btn-group-divider,
+[data-color-mode="auto"][data-dark-theme] #gfb-container .gfb-btn-group-divider {
+  background-color: rgba(240, 246, 252, 0.1);
+}
+
+[data-color-mode="dark"] #gfb-container .gfb-group-btn,
+[data-color-mode="auto"][data-dark-theme] #gfb-container .gfb-group-btn {
+  color: #c9d1d9;
+}
+
+[data-color-mode="dark"] #gfb-container .gfb-group-btn:hover,
+[data-color-mode="auto"][data-dark-theme] #gfb-container .gfb-group-btn:hover {
   background-color: #30363d;
 }
 

@@ -87,6 +87,10 @@
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function actionScrollBottom() {
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+  }
+
   async function actionReviewApprove() {
     const pull = getPullContext();
     if (!pull) {
@@ -191,12 +195,27 @@
   const ACTIONS = {
     "pr-list": actionPrList,
     "scroll-top": actionScrollTop,
+    "scroll-bottom": actionScrollBottom,
     "review-approve": actionReviewApprove
   };
 
   /* ----------------------------- 렌더링 ----------------------------- */
   function buttonDef(id) {
     return GFB.BUTTONS.find((b) => b.id === id);
+  }
+
+  function makeBtn(def) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.dataset.gfbId = def.id;
+    btn.dataset.label = def.label;
+    btn.setAttribute("aria-label", def.label);
+    btn.innerHTML = def.icon;
+    btn.addEventListener("click", () => {
+      const fn = ACTIONS[def.id];
+      if (fn) fn();
+    });
+    return btn;
   }
 
   function render(settings) {
@@ -213,21 +232,52 @@
     const container = document.createElement("div");
     container.id = CONTAINER_ID;
 
-    for (const item of enabled) {
+    // 그룹별로 묶어서 렌더링
+    let i = 0;
+    while (i < enabled.length) {
+      const item = enabled[i];
       const def = buttonDef(item.id);
-      if (!def) continue;
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "gfb-btn";
-      btn.dataset.gfbId = def.id;
-      btn.dataset.label = def.label;
-      btn.setAttribute("aria-label", def.label);
-      btn.innerHTML = def.icon;
-      btn.addEventListener("click", () => {
-        const fn = ACTIONS[def.id];
-        if (fn) fn();
-      });
-      container.appendChild(btn);
+      if (!def) { i++; continue; }
+
+      // 같은 group에 속하는 연속된 버튼들을 수집
+      if (def.group) {
+        const groupItems = [];
+        while (i < enabled.length) {
+          const d = buttonDef(enabled[i].id);
+          if (d && d.group === def.group) {
+            groupItems.push(d);
+            i++;
+          } else {
+            break;
+          }
+        }
+        if (groupItems.length === 1) {
+          // 하나만 enabled이면 독립 버튼으로
+          const btn = makeBtn(groupItems[0]);
+          btn.className = "gfb-btn";
+          container.appendChild(btn);
+        } else {
+          const group = document.createElement("div");
+          group.className = "gfb-btn-group";
+          group.setAttribute("role", "group");
+          groupItems.forEach((gDef, idx) => {
+            if (idx > 0) {
+              const divider = document.createElement("div");
+              divider.className = "gfb-btn-group-divider";
+              group.appendChild(divider);
+            }
+            const btn = makeBtn(gDef);
+            btn.className = "gfb-group-btn";
+            group.appendChild(btn);
+          });
+          container.appendChild(group);
+        }
+      } else {
+        const btn = makeBtn(def);
+        btn.className = "gfb-btn";
+        container.appendChild(btn);
+        i++;
+      }
     }
 
     document.body.appendChild(container);
