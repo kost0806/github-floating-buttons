@@ -163,24 +163,80 @@
         };
       });
 
-    const comment = $("#approve-comment");
-    comment.value = state.approveComment || "";
-    let debounce = null;
-    comment.addEventListener("input", () => {
-      state.approveComment = comment.value;
-      if (debounce) clearTimeout(debounce);
-      debounce = setTimeout(async () => {
-        await persist();
-        showStatus("저장됨");
-      }, 400);
-    });
-
+    renderApproveComments();
     toggleCommentRow();
   }
 
   function toggleCommentRow() {
     const row = $("#approve-comment-row");
     row.classList.toggle("hidden", state.reviewAction !== "approve");
+  }
+
+  /* ------------------------- Approve 메시지 목록 ------------------------ */
+  let commentDebounce = null;
+  function debouncedPersist() {
+    if (commentDebounce) clearTimeout(commentDebounce);
+    commentDebounce = setTimeout(async () => {
+      await persist();
+      showStatus("저장됨");
+    }, 400);
+  }
+
+  function renderApproveComments() {
+    const list = $("#approve-comment-list");
+    list.innerHTML = "";
+    if (!state.approveComments.length) {
+      const empty = document.createElement("li");
+      empty.className = "empty";
+      empty.textContent = "등록된 메시지가 없어요. 최소 1개 이상 추가해주세요.";
+      list.appendChild(empty);
+      return;
+    }
+    state.approveComments.forEach((comment, index) => {
+      const li = document.createElement("li");
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = comment;
+      input.maxLength = 500;
+      input.addEventListener("input", () => {
+        state.approveComments[index] = input.value;
+        debouncedPersist();
+      });
+      li.appendChild(input);
+
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "remove";
+      remove.textContent = "삭제";
+      remove.addEventListener("click", async () => {
+        if (state.approveComments.length <= 1) {
+          showStatus("최소 1개의 메시지는 있어야 해요.");
+          return;
+        }
+        state.approveComments.splice(index, 1);
+        await persist();
+        renderApproveComments();
+        showStatus("삭제됨");
+      });
+      li.appendChild(remove);
+
+      list.appendChild(li);
+    });
+  }
+
+  async function addApproveComment() {
+    const input = $("#approve-comment-input");
+    const value = input.value.trim();
+    if (!value) {
+      showStatus("메시지를 입력해주세요.");
+      return;
+    }
+    state.approveComments.push(value);
+    await persist();
+    input.value = "";
+    renderApproveComments();
+    showStatus("추가됨");
   }
 
   /* --------------------------- Enterprise 호스트 --------------------------- */
@@ -275,6 +331,11 @@
     $("#host-add-btn").addEventListener("click", addHost);
     $("#host-input").addEventListener("keydown", (e) => {
       if (e.key === "Enter") addHost();
+    });
+
+    $("#approve-comment-add-btn").addEventListener("click", addApproveComment);
+    $("#approve-comment-input").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") addApproveComment();
     });
   }
 

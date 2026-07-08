@@ -160,8 +160,9 @@
 
     // 3. 자동 approve: 코멘트 입력 후 제출
     const body = GFB.queryFirst(GFB.SELECTORS.reviewBody);
-    if (body && settings.approveComment) {
-      body.value = settings.approveComment;
+    const comment = GFB.pickRandom(settings.approveComments);
+    if (body && comment) {
+      body.value = comment;
       body.dispatchEvent(new Event("input", { bubbles: true }));
     }
     const submit = GFB.queryFirst(GFB.SELECTORS.submitButton);
