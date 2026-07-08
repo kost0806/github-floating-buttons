@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "GitHub Floating Buttons",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "GitHub / GitHub Enterprise 페이지 우측 하단에 유용한 floating 버튼을 추가합니다 (PR 목록, 맨 위로 스크롤, 리뷰창 열기/자동 approve).",
   "permissions": [
     "storage",
