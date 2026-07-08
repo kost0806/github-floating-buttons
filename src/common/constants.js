@@ -52,7 +52,7 @@
   const DEFAULT_SETTINGS = {
     buttons: BUTTONS.map((b, i) => ({ id: b.id, enabled: true, order: i })),
     reviewAction: "open", // "open" | "approve"
-    approveComment: "LGTM 👍",
+    approveComments: ["LGTM 👍"], // 자동 approve 시 랜덤으로 선택될 메시지 목록
     enterpriseHosts: [] // ["github.mycompany.com", ...]
   };
 
@@ -99,10 +99,27 @@
     });
     if (!Array.isArray(s.enterpriseHosts)) s.enterpriseHosts = [];
     if (s.reviewAction !== "approve") s.reviewAction = "open";
-    if (typeof s.approveComment !== "string") {
-      s.approveComment = DEFAULT_SETTINGS.approveComment;
+
+    // approveComments 배열 보정. 구버전(단일 문자열 approveComment)은 마이그레이션.
+    let comments = Array.isArray(stored && stored.approveComments)
+      ? stored.approveComments.filter((c) => typeof c === "string" && c.trim() !== "")
+      : [];
+    if (!comments.length && typeof (stored && stored.approveComment) === "string") {
+      const legacy = stored.approveComment.trim();
+      if (legacy) comments = [legacy];
     }
+    s.approveComments = comments.length
+      ? comments
+      : DEFAULT_SETTINGS.approveComments.slice();
+    delete s.approveComment;
+
     return s;
+  }
+
+  /** 배열에서 랜덤으로 하나를 선택. 비어있으면 null. */
+  function pickRandom(arr) {
+    if (!Array.isArray(arr) || arr.length === 0) return null;
+    return arr[Math.floor(Math.random() * arr.length)];
   }
 
   function getSettings() {
@@ -160,6 +177,7 @@
     mergeSettings,
     getSettings,
     saveSettings,
+    pickRandom,
     normalizeHost,
     originPatternForHost,
     queryFirst
