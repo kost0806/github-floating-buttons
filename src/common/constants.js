@@ -14,13 +14,28 @@
 
   const STORAGE_KEY = "settings";
 
-  /** UI 언어가 한국어인지 확인. chrome.i18n 없는 환경(테스트 등)은 false. */
+  /** 브라우저 UI 언어가 한국어인지 확인. chrome.i18n 없는 환경은 false. */
   function isKorean() {
     try {
       const lang = chrome.i18n.getUILanguage();
       return lang === "ko" || lang.startsWith("ko-");
     } catch (e) {
       return false;
+    }
+  }
+
+  // 현재 적용된 언어 ("ko" | "en"). 기본값은 브라우저 설정에서 자동 결정.
+  let _lang = isKorean() ? "ko" : "en";
+
+  /**
+   * 언어를 설정한다.
+   * @param {"auto"|"ko"|"en"} lang  "auto"이면 브라우저 언어로 결정.
+   */
+  function setLang(lang) {
+    if (lang === "ko" || lang === "en") {
+      _lang = lang;
+    } else {
+      _lang = isKorean() ? "ko" : "en";
     }
   }
 
@@ -68,7 +83,12 @@
       commentPlaceholder: "예) LGTM 👍",
       addBtn: "추가",
       sectionEnterprise: "GitHub Enterprise 호스트",
-      hintEnterprise: "예: <code>github.mycompany.com</code> — 추가 시 해당 사이트 접근 권한을 요청해요. github.com 은 기본 지원됩니다."
+      hintEnterprise: "예: <code>github.mycompany.com</code> — 추가 시 해당 사이트 접근 권한을 요청해요. github.com 은 기본 지원됩니다.",
+      sectionLanguage: "언어",
+      hintLanguage: "설정 페이지 및 알림 메시지에 사용할 언어를 선택해요.",
+      langAuto: "브라우저 설정 (자동)",
+      langKo: "한국어",
+      langEn: "English"
     },
     en: {
       btnPrList: "Go to Pull Request list",
@@ -112,14 +132,18 @@
       commentPlaceholder: "e.g. LGTM 👍",
       addBtn: "Add",
       sectionEnterprise: "GitHub Enterprise Hosts",
-      hintEnterprise: "e.g. <code>github.mycompany.com</code> — adding a host will request permission for that site. github.com is supported by default."
+      hintEnterprise: "e.g. <code>github.mycompany.com</code> — adding a host will request permission for that site. github.com is supported by default.",
+      sectionLanguage: "Language",
+      hintLanguage: "Choose the language for the settings page and notification messages.",
+      langAuto: "Browser default (auto)",
+      langKo: "한국어",
+      langEn: "English"
     }
   };
 
-  /** 현재 UI 언어에 맞는 문자열을 반환. */
+  /** 현재 적용 언어에 맞는 문자열을 반환. */
   function t(key) {
-    const lang = isKorean() ? "ko" : "en";
-    return STRINGS[lang][key];
+    return STRINGS[_lang][key];
   }
 
   /** 버튼 레지스트리. id 는 설정/동작 분기의 키로 쓰인다. */
@@ -179,7 +203,8 @@
     buttons: BUTTONS.map((b, i) => ({ id: b.id, enabled: b.defaultEnabled !== false, order: i })),
     reviewAction: "open", // "open" | "approve"
     approveComments: ["LGTM 👍"], // 자동 approve 시 랜덤으로 선택될 메시지 목록
-    enterpriseHosts: [] // ["github.mycompany.com", ...]
+    enterpriseHosts: [], // ["github.mycompany.com", ...]
+    language: "auto" // "auto" | "ko" | "en"
   };
 
   /** GitHub DOM 셀렉터. 사이트 변경에 대비해 후보를 여러 개 둔다. */
@@ -244,6 +269,7 @@
     });
     if (!Array.isArray(s.enterpriseHosts)) s.enterpriseHosts = [];
     if (s.reviewAction !== "approve") s.reviewAction = "open";
+    if (!["auto", "ko", "en"].includes(s.language)) s.language = "auto";
 
     // approveComments 배열 보정. 구버전(단일 문자열 approveComment)은 마이그레이션.
     let comments = Array.isArray(stored && stored.approveComments)
@@ -321,6 +347,7 @@
     SELECTORS,
     STRINGS,
     t,
+    setLang,
     isKorean,
     mergeSettings,
     getSettings,

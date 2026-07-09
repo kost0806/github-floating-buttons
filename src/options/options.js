@@ -338,16 +338,37 @@
       const val = GFB.t(key);
       if (typeof val === "string") el.placeholder = val;
     });
-    if (!GFB.isKorean()) document.documentElement.lang = "en";
+    document.title = GFB.t("pageTitle");
+    document.documentElement.lang = GFB.isKorean() ? "ko" : "en";
+  }
+
+  /* --------------------------- 언어 선택 --------------------------- */
+  function renderLanguage() {
+    const sel = $("#language-select");
+    sel.value = state.language;
+    sel.onchange = async () => {
+      state.language = sel.value;
+      GFB.setLang(state.language);
+      await persist();
+      // 언어가 바뀌면 UI 전체를 다시 그린다.
+      applyI18n();
+      renderButtonList();
+      renderReviewAction();
+      renderHosts();
+      renderLanguage();
+      showStatus(GFB.t("saved"));
+    };
   }
 
   /* ------------------------------ 초기화 ----------------------------- */
   async function init() {
-    applyI18n();
     state = await GFB.getSettings();
+    GFB.setLang(state.language);
+    applyI18n();
     renderButtonList();
     renderReviewAction();
     renderHosts();
+    renderLanguage();
 
     $("#host-add-btn").addEventListener("click", addHost);
     $("#host-input").addEventListener("keydown", (e) => {

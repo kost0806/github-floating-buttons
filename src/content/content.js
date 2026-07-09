@@ -345,6 +345,7 @@
 
   async function rerender() {
     const settings = await GFB.getSettings();
+    GFB.setLang(settings.language);
     render(settings);
   }
 
