@@ -194,27 +194,39 @@
   }
 
   /** PR 페이지에서 병합 전략을 선택하고 Merge 버튼을 클릭한다. */
-  async function actionMerge(strategySelectors) {
+  async function actionMerge(strategySelectors, label) {
     const pull = getPullContext();
     if (!pull) {
       showToast("Pull Request 페이지에서만 사용할 수 있어요.");
       return;
     }
 
-    // 전략 드롭다운이 있으면 열어서 원하는 전략 선택
-    const strategyDropdown = GFB.queryFirst(GFB.SELECTORS.mergeStrategyDropdown);
-    const strategyOption = GFB.queryFirst(strategySelectors);
+    if (!window.confirm(`이 PR을 ${label}으로 병합할까요?`)) return;
 
-    if (strategyDropdown && strategyOption) {
+    // 전략 드롭다운이 있으면 먼저 열고, 그 다음 옵션을 waitFor로 폴링
+    const strategyDropdown = GFB.queryFirst(GFB.SELECTORS.mergeStrategyDropdown);
+    if (strategyDropdown) {
       const details = strategyDropdown.closest("details");
       if (details && !details.open) strategyDropdown.click();
-      await new Promise((r) => setTimeout(r, 150));
+
+      const strategyOption = await waitFor(strategySelectors, 2000);
+      if (!strategyOption) {
+        showToast("병합 전략 옵션을 찾지 못했어요. GitHub 페이지 구조가 바뀌었을 수 있어요.");
+        return;
+      }
       strategyOption.click();
       await new Promise((r) => setTimeout(r, 200));
-    } else if (!strategyOption && strategyDropdown) {
-      // 드롭다운은 있지만 해당 전략 옵션을 못 찾음
-      showToast("병합 전략 옵션을 찾지 못했어요. GitHub 페이지 구조가 바뀌었을 수 있어요.");
-      return;
+    } else {
+      // 드롭다운 없이 전략 버튼이 독립적으로 노출될 경우
+      const strategyOption = GFB.queryFirst(strategySelectors);
+      if (strategyOption) {
+        strategyOption.click();
+        await new Promise((r) => setTimeout(r, 200));
+      } else {
+        // 전략을 선택할 수단이 없으면 현재 선택된 전략으로 진행하지 않고 중단
+        showToast("병합 전략을 선택할 수 없어요. 레포지토리 설정을 확인해주세요.");
+        return;
+      }
     }
 
     // 메인 병합 버튼 클릭
@@ -223,15 +235,20 @@
       showToast("Merge 버튼을 찾지 못했어요. PR이 이미 병합됐거나 병합할 수 없는 상태일 수 있어요.");
       return;
     }
+    if (mergeBtn.disabled) {
+      showToast("병합할 수 없는 상태예요 (Draft, 충돌, 브랜치 보호 등).");
+      return;
+    }
     mergeBtn.click();
+    showToast("병합을 요청했어요.");
   }
 
   function actionMergeCommit() {
-    return actionMerge(GFB.SELECTORS.mergeCommitOption);
+    return actionMerge(GFB.SELECTORS.mergeCommitOption, "Merge commit");
   }
 
   function actionSquashMerge() {
-    return actionMerge(GFB.SELECTORS.squashMergeOption);
+    return actionMerge(GFB.SELECTORS.squashMergeOption, "Squash merge");
   }
 
   const ACTIONS = {
@@ -276,27 +293,27 @@
     const container = document.createElement("div");
     container.id = CONTAINER_ID;
 
-    // 그룹별로 묶어서 렌더링
-    let i = 0;
-    while (i < enabled.length) {
-      const item = enabled[i];
+    // 그룹 멤버를 미리 수집 (순서 무관하게 같은 group끼리 묶음)
+    const groupDefs = new Map(); // group → [def, ...]
+    for (const item of enabled) {
       const def = buttonDef(item.id);
-      if (!def) { i++; continue; }
+      if (!def || !def.group) continue;
+      if (!groupDefs.has(def.group)) groupDefs.set(def.group, []);
+      groupDefs.get(def.group).push(def);
+    }
 
-      // 같은 group에 속하는 연속된 버튼들을 수집
+    const renderedGroups = new Set();
+
+    for (const item of enabled) {
+      const def = buttonDef(item.id);
+      if (!def) continue;
+
       if (def.group) {
-        const groupItems = [];
-        while (i < enabled.length) {
-          const d = buttonDef(enabled[i].id);
-          if (d && d.group === def.group) {
-            groupItems.push(d);
-            i++;
-          } else {
-            break;
-          }
-        }
+        if (renderedGroups.has(def.group)) continue; // 이미 렌더링됨
+        renderedGroups.add(def.group);
+        const groupItems = groupDefs.get(def.group);
+
         if (groupItems.length === 1) {
-          // 하나만 enabled이면 독립 버튼으로
           const btn = makeBtn(groupItems[0]);
           btn.className = "gfb-btn";
           container.appendChild(btn);
@@ -320,7 +337,6 @@
         const btn = makeBtn(def);
         btn.className = "gfb-btn";
         container.appendChild(btn);
-        i++;
       }
     }
 
