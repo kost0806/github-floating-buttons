@@ -55,7 +55,7 @@
       const handle = document.createElement("span");
       handle.className = "drag-handle";
       handle.textContent = "⠿";
-      handle.title = "드래그해서 순서 변경";
+      handle.title = GFB.t("dragTitle");
       li.appendChild(handle);
 
       // 체크박스
@@ -65,7 +65,7 @@
       checkbox.addEventListener("change", async () => {
         item.enabled = checkbox.checked;
         await persist();
-        showStatus("저장됨");
+        showStatus(GFB.t("saved"));
       });
       li.appendChild(checkbox);
 
@@ -81,13 +81,13 @@
       const up = document.createElement("button");
       up.type = "button";
       up.textContent = "↑";
-      up.title = "위로";
+      up.title = GFB.t("up");
       up.disabled = index === 0;
       up.addEventListener("click", () => moveButton(item.id, -1));
       const down = document.createElement("button");
       down.type = "button";
       down.textContent = "↓";
-      down.title = "아래로";
+      down.title = GFB.t("down");
       down.disabled = index === ordered.length - 1;
       down.addEventListener("click", () => moveButton(item.id, 1));
       orderBtns.appendChild(up);
@@ -108,7 +108,7 @@
     reindexOrder(ids);
     await persist();
     renderButtonList();
-    showStatus("저장됨");
+    showStatus(GFB.t("saved"));
   }
 
   /* 드래그 앤 드롭 */
@@ -144,7 +144,7 @@
       dragId = null;
       await persist();
       renderButtonList();
-      showStatus("저장됨");
+      showStatus(GFB.t("saved"));
     });
   }
 
@@ -159,7 +159,7 @@
           state.reviewAction = radio.value;
           toggleCommentRow();
           await persist();
-          showStatus("저장됨");
+          showStatus(GFB.t("saved"));
         };
       });
 
@@ -178,7 +178,7 @@
     if (commentDebounce) clearTimeout(commentDebounce);
     commentDebounce = setTimeout(async () => {
       await persist();
-      showStatus("저장됨");
+      showStatus(GFB.t("saved"));
     }, 400);
   }
 
@@ -188,7 +188,7 @@
     if (!state.approveComments.length) {
       const empty = document.createElement("li");
       empty.className = "empty";
-      empty.textContent = "등록된 메시지가 없어요. 최소 1개 이상 추가해주세요.";
+      empty.textContent = GFB.t("noMessages");
       list.appendChild(empty);
       return;
     }
@@ -208,16 +208,16 @@
       const remove = document.createElement("button");
       remove.type = "button";
       remove.className = "remove";
-      remove.textContent = "삭제";
+      remove.textContent = GFB.t("removeBtn");
       remove.addEventListener("click", async () => {
         if (state.approveComments.length <= 1) {
-          showStatus("최소 1개의 메시지는 있어야 해요.");
+          showStatus(GFB.t("minOneMessage"));
           return;
         }
         state.approveComments.splice(index, 1);
         await persist();
         renderApproveComments();
-        showStatus("삭제됨");
+        showStatus(GFB.t("deleted"));
       });
       li.appendChild(remove);
 
@@ -229,14 +229,14 @@
     const input = $("#approve-comment-input");
     const value = input.value.trim();
     if (!value) {
-      showStatus("메시지를 입력해주세요.");
+      showStatus(GFB.t("enterMessage"));
       return;
     }
     state.approveComments.push(value);
     await persist();
     input.value = "";
     renderApproveComments();
-    showStatus("추가됨");
+    showStatus(GFB.t("added"));
   }
 
   /* --------------------------- Enterprise 호스트 --------------------------- */
@@ -246,7 +246,7 @@
     if (!state.enterpriseHosts.length) {
       const empty = document.createElement("li");
       empty.className = "empty";
-      empty.textContent = "등록된 호스트가 없어요.";
+      empty.textContent = GFB.t("noHosts");
       list.appendChild(empty);
       return;
     }
@@ -257,7 +257,7 @@
       const remove = document.createElement("button");
       remove.type = "button";
       remove.className = "remove";
-      remove.textContent = "삭제";
+      remove.textContent = GFB.t("removeBtn");
       remove.addEventListener("click", () => removeHost(host));
       li.appendChild(name);
       li.appendChild(remove);
@@ -269,11 +269,11 @@
     const input = $("#host-input");
     const host = GFB.normalizeHost(input.value);
     if (!host) {
-      showStatus("올바른 호스트가 아니에요 (예: github.mycompany.com)");
+      showStatus(GFB.t("invalidHost"));
       return;
     }
     if (state.enterpriseHosts.includes(host)) {
-      showStatus("이미 등록된 호스트예요.");
+      showStatus(GFB.t("hostAlreadyAdded"));
       return;
     }
 
@@ -285,7 +285,7 @@
       );
     });
     if (!granted) {
-      showStatus("권한이 거부되어 호스트를 추가하지 못했어요.");
+      showStatus(GFB.t("permissionDenied"));
       return;
     }
 
@@ -294,7 +294,7 @@
     input.value = "";
     renderHosts();
     notifyBackgroundSync();
-    showStatus(`${host} 추가됨`);
+    showStatus(GFB.t("hostAdded")(host));
   }
 
   async function removeHost(host) {
@@ -307,7 +307,7 @@
     );
     renderHosts();
     notifyBackgroundSync();
-    showStatus(`${host} 삭제됨`);
+    showStatus(GFB.t("hostRemoved")(host));
   }
 
   function notifyBackgroundSync() {
@@ -321,8 +321,29 @@
     }
   }
 
+  /* ------------------------------ i18n 적용 ----------------------------- */
+  function applyI18n() {
+    document.querySelectorAll("[data-i18n]").forEach((el) => {
+      const key = el.dataset.i18n;
+      const val = GFB.t(key);
+      if (typeof val === "string") el.textContent = val;
+    });
+    document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+      const key = el.dataset.i18nHtml;
+      const val = GFB.t(key);
+      if (typeof val === "string") el.innerHTML = val;
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+      const key = el.dataset.i18nPlaceholder;
+      const val = GFB.t(key);
+      if (typeof val === "string") el.placeholder = val;
+    });
+    if (!GFB.isKorean()) document.documentElement.lang = "en";
+  }
+
   /* ------------------------------ 초기화 ----------------------------- */
   async function init() {
+    applyI18n();
     state = await GFB.getSettings();
     renderButtonList();
     renderReviewAction();

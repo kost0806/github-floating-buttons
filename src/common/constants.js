@@ -14,18 +14,126 @@
 
   const STORAGE_KEY = "settings";
 
+  /** UI 언어가 한국어인지 확인. chrome.i18n 없는 환경(테스트 등)은 false. */
+  function isKorean() {
+    try {
+      const lang = chrome.i18n.getUILanguage();
+      return lang === "ko" || lang.startsWith("ko-");
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /** 다국어 문자열 테이블. */
+  const STRINGS = {
+    ko: {
+      btnPrList: "Pull Request 목록으로 가기",
+      btnScrollTop: "맨 위로 스크롤",
+      btnScrollBottom: "맨 아래로 스크롤",
+      btnReviewApprove: "현재 PR 리뷰창 열기",
+      toastRepoOnly: "레포지토리 페이지에서만 사용할 수 있어요.",
+      toastPrOnly: "Pull Request 페이지에서만 사용할 수 있어요.",
+      toastReviewBtnNotFound: "리뷰 버튼을 찾지 못했어요. GitHub 페이지 구조가 바뀌었을 수 있어요.",
+      toastApproveRadioNotFound: "Approve 옵션을 찾지 못했어요. 리뷰창만 열어둘게요.",
+      toastSubmitNotFound: "제출 버튼을 찾지 못했어요. 수동으로 제출해주세요.",
+      toastApproveSubmitted: "Approve 리뷰를 제출했어요.",
+      saved: "저장됨",
+      added: "추가됨",
+      deleted: "삭제됨",
+      dragTitle: "드래그해서 순서 변경",
+      up: "위로",
+      down: "아래로",
+      noMessages: "등록된 메시지가 없어요. 최소 1개 이상 추가해주세요.",
+      removeBtn: "삭제",
+      minOneMessage: "최소 1개의 메시지는 있어야 해요.",
+      enterMessage: "메시지를 입력해주세요.",
+      noHosts: "등록된 호스트가 없어요.",
+      invalidHost: "올바른 호스트가 아니에요 (예: github.mycompany.com)",
+      hostAlreadyAdded: "이미 등록된 호스트예요.",
+      permissionDenied: "권한이 거부되어 호스트를 추가하지 못했어요.",
+      hostAdded: (host) => `${host} 추가됨`,
+      hostRemoved: (host) => `${host} 삭제됨`,
+      pageTitle: "GitHub Floating Buttons 설정",
+      pageSubtitle: "우측 하단 floating 버튼을 켜고 끄거나 순서를 바꾸고, GitHub Enterprise 호스트를 등록할 수 있어요.",
+      sectionButtons: "버튼",
+      hintButtons: "체크박스로 켜고 끄고, 드래그(⠿)하거나 ↑/↓로 순서를 바꿔요.",
+      sectionReview: "리뷰 동작",
+      hintReview: "\"현재 PR 리뷰창 열기\" 버튼이 어떻게 동작할지 선택해요.",
+      radioOpenLabel: "리뷰창만 열기",
+      radioOpenDesc: "(Approve 선택까지만, 제출은 직접)",
+      radioApproveLabel: "자동 approve",
+      radioApproveDesc: "(Approve 선택 + 코멘트 입력 + 제출까지)",
+      approveCommentsLabel: "Approve 메시지 목록",
+      hintApproveComments: "자동 approve 제출 시 목록 중 하나가 랜덤으로 선택돼요.",
+      commentPlaceholder: "예) LGTM 👍",
+      addBtn: "추가",
+      sectionEnterprise: "GitHub Enterprise 호스트",
+      hintEnterprise: "예: <code>github.mycompany.com</code> — 추가 시 해당 사이트 접근 권한을 요청해요. github.com 은 기본 지원됩니다."
+    },
+    en: {
+      btnPrList: "Go to Pull Request list",
+      btnScrollTop: "Scroll to top",
+      btnScrollBottom: "Scroll to bottom",
+      btnReviewApprove: "Open PR review panel",
+      toastRepoOnly: "Only available on repository pages.",
+      toastPrOnly: "Only available on Pull Request pages.",
+      toastReviewBtnNotFound: "Review button not found. GitHub's page structure may have changed.",
+      toastApproveRadioNotFound: "Approve option not found. Leaving the review panel open.",
+      toastSubmitNotFound: "Submit button not found. Please submit manually.",
+      toastApproveSubmitted: "Approve review submitted.",
+      saved: "Saved",
+      added: "Added",
+      deleted: "Deleted",
+      dragTitle: "Drag to reorder",
+      up: "Up",
+      down: "Down",
+      noMessages: "No messages added. Please add at least one.",
+      removeBtn: "Remove",
+      minOneMessage: "At least one message is required.",
+      enterMessage: "Please enter a message.",
+      noHosts: "No hosts added.",
+      invalidHost: "Invalid host (e.g. github.mycompany.com)",
+      hostAlreadyAdded: "Host already added.",
+      permissionDenied: "Permission denied. Host was not added.",
+      hostAdded: (host) => `${host} added`,
+      hostRemoved: (host) => `${host} removed`,
+      pageTitle: "GitHub Floating Buttons Settings",
+      pageSubtitle: "Enable or disable floating buttons in the bottom-right corner, reorder them, and register GitHub Enterprise hosts.",
+      sectionButtons: "Buttons",
+      hintButtons: "Use checkboxes to enable/disable, drag (⠿) or ↑/↓ to reorder.",
+      sectionReview: "Review Action",
+      hintReview: "Choose how the \"Open PR review panel\" button behaves.",
+      radioOpenLabel: "Open review panel only",
+      radioOpenDesc: "(selects Approve; you submit manually)",
+      radioApproveLabel: "Auto-approve",
+      radioApproveDesc: "(selects Approve + enters comment + submits)",
+      approveCommentsLabel: "Approve message list",
+      hintApproveComments: "One message is picked at random when auto-approve submits.",
+      commentPlaceholder: "e.g. LGTM 👍",
+      addBtn: "Add",
+      sectionEnterprise: "GitHub Enterprise Hosts",
+      hintEnterprise: "e.g. <code>github.mycompany.com</code> — adding a host will request permission for that site. github.com is supported by default."
+    }
+  };
+
+  /** 현재 UI 언어에 맞는 문자열을 반환. */
+  function t(key) {
+    const lang = isKorean() ? "ko" : "en";
+    return STRINGS[lang][key];
+  }
+
   /** 버튼 레지스트리. id 는 설정/동작 분기의 키로 쓰인다. */
   const BUTTONS = [
     {
       id: "pr-list",
-      label: "Pull Request 목록으로 가기",
+      get label() { return t("btnPrList"); },
       // list / rows icon
       icon:
         '<svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M2.5 3.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM2.5 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm0 3.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2ZM6 4.25A.75.75 0 0 1 6.75 3.5h7a.75.75 0 0 1 0 1.5h-7A.75.75 0 0 1 6 4.25Zm0 3.75A.75.75 0 0 1 6.75 7.25h7a.75.75 0 0 1 0 1.5h-7A.75.75 0 0 1 6 8Zm0 3.75a.75.75 0 0 1 .75-.75h7a.75.75 0 0 1 0 1.5h-7a.75.75 0 0 1-.75-.75Z"/></svg>'
     },
     {
       id: "scroll-top",
-      label: "맨 위로 스크롤",
+      get label() { return t("btnScrollTop"); },
       // chevron up icon
       icon:
         '<svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M3.22 10.53a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 1 1-1.06 1.06L8 6.81l-3.72 3.72a.75.75 0 0 1-1.06 0Z"/></svg>',
@@ -33,7 +141,7 @@
     },
     {
       id: "scroll-bottom",
-      label: "맨 아래로 스크롤",
+      get label() { return t("btnScrollBottom"); },
       // chevron down icon
       icon:
         '<svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12.78 5.47a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L3.22 6.53a.75.75 0 0 1 1.06-1.06L8 9.19l3.72-3.72a.75.75 0 0 1 1.06 0Z"/></svg>',
@@ -41,7 +149,7 @@
     },
     {
       id: "review-approve",
-      label: "현재 PR 리뷰창 열기",
+      get label() { return t("btnReviewApprove"); },
       // check / approve icon
       icon:
         '<svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/></svg>'
@@ -211,6 +319,9 @@
     BUTTONS,
     DEFAULT_SETTINGS,
     SELECTORS,
+    STRINGS,
+    t,
+    isKorean,
     mergeSettings,
     getSettings,
     saveSettings,

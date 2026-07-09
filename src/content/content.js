@@ -77,7 +77,7 @@
   function actionPrList() {
     const ctx = getRepoContext();
     if (!ctx) {
-      showToast("레포지토리 페이지에서만 사용할 수 있어요.");
+      showToast(GFB.t("toastRepoOnly"));
       return;
     }
     location.assign(`${location.origin}/${ctx.owner}/${ctx.repo}/pulls`);
@@ -94,7 +94,7 @@
   async function actionReviewApprove() {
     const pull = getPullContext();
     if (!pull) {
-      showToast("Pull Request 페이지에서만 사용할 수 있어요.");
+      showToast(GFB.t("toastPrOnly"));
       return;
     }
     if (!isFilesTab()) {
@@ -133,7 +133,7 @@
     // 1. 리뷰 팝오버 열기
     const reviewBtn = await waitFor(GFB.SELECTORS.reviewButton, 6000);
     if (!reviewBtn) {
-      showToast("리뷰 버튼을 찾지 못했어요. GitHub 페이지 구조가 바뀌었을 수 있어요.");
+      showToast(GFB.t("toastReviewBtnNotFound"));
       return;
     }
     // <details>/<summary> 형태면 부모 details 를 열고, 아니면 클릭.
@@ -147,7 +147,7 @@
     // 2. Approve 라디오 선택
     const approveRadio = await waitFor(GFB.SELECTORS.approveRadio, 4000);
     if (!approveRadio) {
-      showToast("Approve 옵션을 찾지 못했어요. 리뷰창만 열어둘게요.");
+      showToast(GFB.t("toastApproveRadioNotFound"));
       return;
     }
     approveRadio.checked = true;
@@ -167,12 +167,12 @@
     }
     const submit = GFB.queryFirst(GFB.SELECTORS.submitButton);
     if (!submit) {
-      showToast("제출 버튼을 찾지 못했어요. 수동으로 제출해주세요.");
+      showToast(GFB.t("toastSubmitNotFound"));
       return;
     }
     submit.disabled = false;
     submit.click();
-    showToast("Approve 리뷰를 제출했어요.");
+    showToast(GFB.t("toastApproveSubmitted"));
   }
 
   /** Files 탭 진입 시 보류 중인 리뷰 동작을 재개. */

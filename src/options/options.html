@@ -3,55 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GitHub Floating Buttons 설정</title>
+    <title data-i18n="pageTitle">GitHub Floating Buttons 설정</title>
     <link rel="stylesheet" href="options.css" />
   </head>
   <body>
     <main class="wrap">
       <h1>GitHub Floating Buttons</h1>
-      <p class="sub">
+      <p class="sub" data-i18n="pageSubtitle">
         우측 하단 floating 버튼을 켜고 끄거나 순서를 바꾸고, GitHub Enterprise
         호스트를 등록할 수 있어요.
       </p>
 
       <section class="card">
-        <h2>버튼</h2>
-        <p class="hint">체크박스로 켜고 끄고, 드래그(⠿)하거나 ↑/↓로 순서를 바꿔요.</p>
+        <h2 data-i18n="sectionButtons">버튼</h2>
+        <p class="hint" data-i18n="hintButtons">체크박스로 켜고 끄고, 드래그(⠿)하거나 ↑/↓로 순서를 바꿔요.</p>
         <ul id="button-list" class="button-list"></ul>
       </section>
 
       <section class="card">
-        <h2>리뷰 동작</h2>
-        <p class="hint">"현재 PR 리뷰창 열기" 버튼이 어떻게 동작할지 선택해요.</p>
+        <h2 data-i18n="sectionReview">리뷰 동작</h2>
+        <p class="hint" data-i18n="hintReview">"현재 PR 리뷰창 열기" 버튼이 어떻게 동작할지 선택해요.</p>
         <label class="radio">
           <input type="radio" name="reviewAction" value="open" />
-          <span>리뷰창만 열기 <em>(Approve 선택까지만, 제출은 직접)</em></span>
+          <span><span data-i18n="radioOpenLabel">리뷰창만 열기</span> <em data-i18n="radioOpenDesc">(Approve 선택까지만, 제출은 직접)</em></span>
         </label>
         <label class="radio">
           <input type="radio" name="reviewAction" value="approve" />
-          <span>자동 approve <em>(Approve 선택 + 코멘트 입력 + 제출까지)</em></span>
+          <span><span data-i18n="radioApproveLabel">자동 approve</span> <em data-i18n="radioApproveDesc">(Approve 선택 + 코멘트 입력 + 제출까지)</em></span>
         </label>
 
         <div id="approve-comment-row" class="field">
-          <label>Approve 메시지 목록</label>
-          <p class="hint">자동 approve 제출 시 목록 중 하나가 랜덤으로 선택돼요.</p>
+          <label data-i18n="approveCommentsLabel">Approve 메시지 목록</label>
+          <p class="hint" data-i18n="hintApproveComments">자동 approve 제출 시 목록 중 하나가 랜덤으로 선택돼요.</p>
           <div class="add-host">
             <input
               type="text"
               id="approve-comment-input"
+              data-i18n-placeholder="commentPlaceholder"
               placeholder="예) LGTM 👍"
               maxlength="500"
               autocomplete="off"
             />
-            <button type="button" id="approve-comment-add-btn" class="btn-primary">추가</button>
+            <button type="button" id="approve-comment-add-btn" class="btn-primary" data-i18n="addBtn">추가</button>
           </div>
           <ul id="approve-comment-list" class="comment-list"></ul>
         </div>
       </section>
 
       <section class="card">
-        <h2>GitHub Enterprise 호스트</h2>
-        <p class="hint">
+        <h2 data-i18n="sectionEnterprise">GitHub Enterprise 호스트</h2>
+        <p class="hint" data-i18n-html="hintEnterprise">
           예: <code>github.mycompany.com</code> — 추가 시 해당 사이트 접근 권한을
           요청해요. github.com 은 기본 지원됩니다.
         </p>
@@ -62,7 +63,7 @@
             placeholder="github.mycompany.com"
             autocomplete="off"
           />
-          <button type="button" id="host-add-btn" class="btn-primary">추가</button>
+          <button type="button" id="host-add-btn" class="btn-primary" data-i18n="addBtn">추가</button>
         </div>
         <ul id="host-list" class="host-list"></ul>
       </section>
