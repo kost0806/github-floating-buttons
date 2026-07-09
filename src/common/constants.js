@@ -45,12 +45,30 @@
       // check / approve icon
       icon:
         '<svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"/></svg>'
+    },
+    {
+      id: "merge-commit",
+      label: "Merge commit으로 병합",
+      defaultEnabled: false,
+      // git merge icon
+      icon:
+        '<svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M5.45 5.154A4.25 4.25 0 0 0 9.25 7.5h1.378a2.251 2.251 0 1 1 0 1.5H9.25A5.734 5.734 0 0 1 5 7.123v3.505a2.25 2.25 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.95-.218ZM4.25 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm8.5-4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM5 3.25a.75.75 0 1 0 0 .005V3.25Z"/></svg>',
+      group: "merge"
+    },
+    {
+      id: "squash-merge",
+      label: "Squash merge로 병합",
+      defaultEnabled: false,
+      // compress/squash icon
+      icon:
+        '<svg viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M8.75 1.75a.75.75 0 0 0-1.5 0v5.19L5.03 4.72a.75.75 0 0 0-1.06 1.06l3.5 3.5a.75.75 0 0 0 1.06 0l3.5-3.5a.75.75 0 0 0-1.06-1.06L8.75 6.94V1.75ZM1.75 13a.75.75 0 0 0 0 1.5h12.5a.75.75 0 0 0 0-1.5H1.75Z"/></svg>',
+      group: "merge"
     }
   ];
 
   /** 기본 설정값. 저장된 설정과 머지되어 하위호환을 유지한다. */
   const DEFAULT_SETTINGS = {
-    buttons: BUTTONS.map((b, i) => ({ id: b.id, enabled: true, order: i })),
+    buttons: BUTTONS.map((b, i) => ({ id: b.id, enabled: b.defaultEnabled !== false, order: i })),
     reviewAction: "open", // "open" | "approve"
     approveComments: ["LGTM 👍"], // 자동 approve 시 랜덤으로 선택될 메시지 목록
     enterpriseHosts: [] // ["github.mycompany.com", ...]
@@ -76,6 +94,25 @@
     submitButton: [
       ".js-reviews-container button[type=submit]",
       'button[type="submit"].js-reviews-submit-button'
+    ],
+    mergeStrategyDropdown: [
+      ".merge-pr-select summary",
+      'summary[data-target="merge-box.strategyButton"]',
+      ".js-merge-commit-selector summary"
+    ],
+    mergeCommitOption: [
+      'button[data-merge-type="merge_commit"]',
+      'button[data-merge-type="merge"]',
+      'button[value="merge"]'
+    ],
+    squashMergeOption: [
+      'button[data-merge-type="squash"]',
+      'button[value="squash"]'
+    ],
+    mergeButton: [
+      "button.js-merge-commit-button",
+      'button[data-target="merge-box.primaryCommitButton"]',
+      'button[type="submit"].js-merge-commit-button'
     ]
   };
 
@@ -93,7 +130,7 @@
       const prev = byId.get(def.id);
       return {
         id: def.id,
-        enabled: prev ? prev.enabled !== false : true,
+        enabled: prev ? prev.enabled !== false : (def.defaultEnabled !== false),
         order: prev && Number.isFinite(prev.order) ? prev.order : i
       };
     });

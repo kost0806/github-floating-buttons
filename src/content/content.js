@@ -193,11 +193,54 @@
     await performReview();
   }
 
+  /** PR 페이지에서 병합 전략을 선택하고 Merge 버튼을 클릭한다. */
+  async function actionMerge(strategySelectors) {
+    const pull = getPullContext();
+    if (!pull) {
+      showToast("Pull Request 페이지에서만 사용할 수 있어요.");
+      return;
+    }
+
+    // 전략 드롭다운이 있으면 열어서 원하는 전략 선택
+    const strategyDropdown = GFB.queryFirst(GFB.SELECTORS.mergeStrategyDropdown);
+    const strategyOption = GFB.queryFirst(strategySelectors);
+
+    if (strategyDropdown && strategyOption) {
+      const details = strategyDropdown.closest("details");
+      if (details && !details.open) strategyDropdown.click();
+      await new Promise((r) => setTimeout(r, 150));
+      strategyOption.click();
+      await new Promise((r) => setTimeout(r, 200));
+    } else if (!strategyOption && strategyDropdown) {
+      // 드롭다운은 있지만 해당 전략 옵션을 못 찾음
+      showToast("병합 전략 옵션을 찾지 못했어요. GitHub 페이지 구조가 바뀌었을 수 있어요.");
+      return;
+    }
+
+    // 메인 병합 버튼 클릭
+    const mergeBtn = GFB.queryFirst(GFB.SELECTORS.mergeButton);
+    if (!mergeBtn) {
+      showToast("Merge 버튼을 찾지 못했어요. PR이 이미 병합됐거나 병합할 수 없는 상태일 수 있어요.");
+      return;
+    }
+    mergeBtn.click();
+  }
+
+  function actionMergeCommit() {
+    return actionMerge(GFB.SELECTORS.mergeCommitOption);
+  }
+
+  function actionSquashMerge() {
+    return actionMerge(GFB.SELECTORS.squashMergeOption);
+  }
+
   const ACTIONS = {
     "pr-list": actionPrList,
     "scroll-top": actionScrollTop,
     "scroll-bottom": actionScrollBottom,
-    "review-approve": actionReviewApprove
+    "review-approve": actionReviewApprove,
+    "merge-commit": actionMergeCommit,
+    "squash-merge": actionSquashMerge
   };
 
   /* ----------------------------- 렌더링 ----------------------------- */
