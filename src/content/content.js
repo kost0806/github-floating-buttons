@@ -215,10 +215,25 @@
         showToast(GFB.t("toastMergeStrategyNotFound"));
         return;
       }
+      // 드롭다운에서 전략 선택 (UI만 변경, 아직 병합 아님)
       strategyOption.click();
-      await new Promise((r) => setTimeout(r, 200));
+      await new Promise((r) => setTimeout(r, 300));
+
+      // 전략 변경 후 첫 번째 클릭: 확인 폼(commit message) 열기
+      const primaryBtn = await waitFor(GFB.SELECTORS.mergeButton, 3000);
+      if (!primaryBtn) {
+        showToast(GFB.t("toastMergeBtnNotFound"));
+        return;
+      }
+      if (primaryBtn.disabled) {
+        showToast(GFB.t("toastMergeNotReady"));
+        return;
+      }
+      primaryBtn.click();
+      await new Promise((r) => setTimeout(r, 300));
     } else {
       // 드롭다운 없이 전략 버튼이 독립적으로 노출될 경우
+      // strategyOption 클릭이 곧 primary 버튼 첫 번째 클릭(확인 폼 열기)
       const strategyOption = GFB.queryFirst(strategySelectors);
       if (strategyOption) {
         strategyOption.click();
@@ -229,7 +244,7 @@
       }
     }
 
-    // 메인 병합 버튼 클릭
+    // 최종 확인 클릭: 실제 병합 완료
     const mergeBtn = GFB.queryFirst(GFB.SELECTORS.mergeButton);
     if (!mergeBtn) {
       showToast(GFB.t("toastMergeBtnNotFound"));
