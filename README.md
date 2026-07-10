@@ -80,6 +80,6 @@ icons/                         # 16/48/128 아이콘
 
 ## 주의
 
-- GitHub 의 DOM 구조 변경 시 "리뷰창 열기"의 셀렉터가 맞지 않을 수 있습니다.
-  셀렉터는 `src/common/constants.js` 의 `SELECTORS` 한 곳에 모아 두어 쉽게
-  업데이트할 수 있습니다.
+- GitHub 의 DOM 구조 변경 시 "리뷰창 열기" 및 Merge 버튼의 셀렉터가 맞지 않을 수
+  있습니다. 셀렉터는 `src/common/constants.js` 의 `SELECTORS` 한 곳에 모아 두어
+  쉽게 업데이트할 수 있습니다.
