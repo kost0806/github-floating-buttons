@@ -1,5 +1,24 @@
 {
   "devDependencies": {
+    "playwright": "^1.61.1",
     "puppeteer": "^25.3.0"
-  }
+  },
+  "name": "github-floating-buttons",
+  "version": "1.0.0",
+  "description": "GitHub 및 GitHub Enterprise 페이지 **우측 하단**에 자주 쓰는 동작을 위한 floating 버튼을 추가하는 Chrome 확장입니다. 빌드 도구 없이 바닐라 JS + Manifest V3 로 작성되어 그대로 로드해 사용할 수 있습니다.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kost0806/github-floating-buttons.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kost0806/github-floating-buttons/issues"
+  },
+  "homepage": "https://github.com/kost0806/github-floating-buttons#readme"
 }
