@@ -74,7 +74,8 @@
   border: 1px solid rgba(27, 31, 36, 0.15);
   background-color: #ffffff;
   box-shadow: 0 1px 3px rgba(27, 31, 36, 0.12), 0 8px 24px rgba(66, 74, 83, 0.12);
-  overflow: hidden;
+  /* overflow:hidden 제거 — 툴팁이 그룹 박스 밖으로 나올 수 있도록 허용.
+     대신 첫/끝 버튼에 border-radius 를 적용해 알약 모양 유지. */
 }
 
 #gfb-container .gfb-btn-group-divider {
@@ -97,6 +98,15 @@
   cursor: pointer;
   position: relative;
   transition: background-color 0.12s ease;
+}
+
+/* 알약 모양 유지: overflow:hidden 대신 첫/끝 버튼에 직접 radius 적용 */
+#gfb-container .gfb-group-btn:first-child {
+  border-radius: 22px 22px 0 0;
+}
+
+#gfb-container .gfb-group-btn:last-child {
+  border-radius: 0 0 22px 22px;
 }
 
 #gfb-container .gfb-group-btn:hover {
