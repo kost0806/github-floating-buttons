@@ -250,22 +250,26 @@
     ],
     mergeStrategyDropdown: [
       ".merge-pr-select summary",
+      ".js-merge-commit-selector summary",
       'summary[data-target="merge-box.strategyButton"]',
-      ".js-merge-commit-selector summary"
+      ".js-merge-pr details summary"
     ],
     mergeCommitOption: [
+      'button[value="merge"]',
       'button[data-merge-type="merge_commit"]',
-      'button[data-merge-type="merge"]',
-      'button[value="merge"]'
+      'button[data-merge-type="merge"]'
     ],
     squashMergeOption: [
-      'button[data-merge-type="squash"]',
-      'button[value="squash"]'
+      'button[value="squash"]',
+      'button[data-merge-type="squash"]'
     ],
     mergeButton: [
+      ".js-merge-box-button-squash",
+      ".js-merge-box-button-merge",
+      ".js-merge-pr button[type=submit]",
+      ".merge-pr button[type=submit]",
       "button.js-merge-commit-button",
-      'button[data-target="merge-box.primaryCommitButton"]',
-      'button[type="submit"].js-merge-commit-button'
+      'button[data-target="merge-box.primaryCommitButton"]'
     ]
   };
 

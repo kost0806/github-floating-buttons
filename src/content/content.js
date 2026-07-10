@@ -250,34 +250,6 @@
     await performReview();
   }
 
-  /**
-   * selectors 중 exclude 요소를 제외한 첫 번째 비활성 버튼을 폴링.
-   * timeout 내에 대안이 없으면 exclude 포함하여 폴백.
-   */
-  function waitForExcluding(selectors, exclude, timeout) {
-    const deadline = Date.now() + (timeout || 3000);
-    return new Promise((resolve) => {
-      const tick = () => {
-        for (const sel of selectors) {
-          for (const el of document.querySelectorAll(sel)) {
-            if (el !== exclude && !el.disabled) return resolve(el);
-          }
-        }
-        if (Date.now() > deadline) {
-          // 타임아웃: exclude 포함 첫 번째 비활성 버튼으로 폴백
-          for (const sel of selectors) {
-            for (const el of document.querySelectorAll(sel)) {
-              if (!el.disabled) return resolve(el);
-            }
-          }
-          return resolve(null);
-        }
-        setTimeout(tick, 120);
-      };
-      tick();
-    });
-  }
-
   /** PR 페이지에서 병합 전략을 선택하고 Merge 버튼을 클릭한다. */
   async function actionMerge(strategySelectors, labelKey, anchorEl) {
     const pull = getPullContext();
@@ -290,8 +262,7 @@
     const confirmed = await showCustomConfirm(anchorEl, GFB.t("confirmMerge")(label));
     if (!confirmed) return;
 
-    // 전략 드롭다운이 있으면 먼저 열고, 그 다음 옵션을 waitFor로 폴링
-    let primaryBtn = null;
+    // 전략 드롭다운이 있으면 먼저 열고 전략 옵션 선택
     const strategyDropdown = GFB.queryFirst(GFB.SELECTORS.mergeStrategyDropdown);
     if (strategyDropdown) {
       const details = strategyDropdown.closest("details");
@@ -302,48 +273,42 @@
         showToast(GFB.t("toastMergeStrategyNotFound"));
         return;
       }
-      // 드롭다운에서 전략 선택 (UI만 변경, 아직 병합 아님)
       strategyOption.click();
-      await new Promise((r) => setTimeout(r, 400));
-
-      // 전략 변경 후 첫 번째 클릭: 확인 폼(commit message) 열기
-      primaryBtn = await waitFor(GFB.SELECTORS.mergeButton, 3000);
-      if (!primaryBtn) {
-        showToast(GFB.t("toastMergeBtnNotFound"));
-        return;
-      }
-      if (primaryBtn.disabled) {
-        showToast(GFB.t("toastMergeNotReady"));
-        return;
-      }
-      primaryBtn.click();
       await new Promise((r) => setTimeout(r, 400));
     } else {
       // 드롭다운 없이 전략 버튼이 독립적으로 노출될 경우
-      // strategyOption 클릭이 곧 primary 버튼 첫 번째 클릭(확인 폼 열기)
       const strategyOption = GFB.queryFirst(strategySelectors);
       if (strategyOption) {
         strategyOption.click();
-        await new Promise((r) => setTimeout(r, 200));
-      } else {
-        showToast(GFB.t("toastMergeStrategyUnavailable"));
-        return;
+        await new Promise((r) => setTimeout(r, 300));
       }
+      // 전략 옵션이 없어도 현재 전략이 이미 맞을 수 있으므로 계속 진행
     }
 
-    // 최종 확인 클릭: 실제 병합 완료
-    // primaryBtn(확인 폼을 연 버튼)과 다른 확인 버튼을 우선 탐색하여
-    // 같은 버튼을 재클릭해 폼이 닫히는 문제를 방지한다.
-    const mergeBtn = await waitForExcluding(GFB.SELECTORS.mergeButton, primaryBtn, 3000);
-    if (!mergeBtn) {
+    // 첫 번째 클릭: 확인 폼(commit message) 열기
+    const primaryBtn = await waitFor(GFB.SELECTORS.mergeButton, 3000);
+    if (!primaryBtn) {
       showToast(GFB.t("toastMergeBtnNotFound"));
       return;
     }
-    if (mergeBtn.disabled) {
+    if (primaryBtn.disabled) {
       showToast(GFB.t("toastMergeNotReady"));
       return;
     }
-    mergeBtn.click();
+    primaryBtn.click();
+    await new Promise((r) => setTimeout(r, 600));
+
+    // 두 번째 클릭: 실제 병합 완료 (같은 버튼이 confirming 상태로 바뀐 것)
+    const confirmBtn = await waitFor(GFB.SELECTORS.mergeButton, 3000);
+    if (!confirmBtn) {
+      showToast(GFB.t("toastMergeBtnNotFound"));
+      return;
+    }
+    if (confirmBtn.disabled) {
+      showToast(GFB.t("toastMergeNotReady"));
+      return;
+    }
+    confirmBtn.click();
     showToast(GFB.t("toastMergeRequested"));
   }
 
