@@ -33,13 +33,19 @@
         </label>
 
         <div id="approve-comment-row" class="field">
-          <label for="approve-comment">Approve 코멘트 문구</label>
-          <input
-            type="text"
-            id="approve-comment"
-            placeholder="예) LGTM 👍"
-            maxlength="500"
-          />
+          <label>Approve 메시지 목록</label>
+          <p class="hint">자동 approve 제출 시 목록 중 하나가 랜덤으로 선택돼요.</p>
+          <div class="add-host">
+            <input
+              type="text"
+              id="approve-comment-input"
+              placeholder="예) LGTM 👍"
+              maxlength="500"
+              autocomplete="off"
+            />
+            <button type="button" id="approve-comment-add-btn" class="btn-primary">추가</button>
+          </div>
+          <ul id="approve-comment-list" class="comment-list"></ul>
         </div>
       </section>
 

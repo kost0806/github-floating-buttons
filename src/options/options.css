@@ -7,6 +7,23 @@
   --accent: #1f883d;
   --accent-hover: #1a7f37;
   --danger: #cf222e;
+  --status-bg: #1f2328;
+  --status-fg: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --border: #30363d;
+    --bg: #0d1117;
+    --bg-subtle: #161b22;
+    --fg: #e6edf3;
+    --fg-muted: #8b949e;
+    --accent: #2ea043;
+    --accent-hover: #3fb950;
+    --danger: #f85149;
+    --status-bg: #e6edf3;
+    --status-fg: #0d1117;
+  }
 }
 
 * {
@@ -222,14 +239,56 @@ input[type="text"]:focus {
   padding: 4px 2px;
 }
 
+/* Approve 메시지 목록 */
+.comment-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.comment-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.comment-list li input[type="text"] {
+  flex: 1;
+  border: none;
+  padding: 6px 2px;
+}
+
+.comment-list li input[type="text"]:focus {
+  outline: none;
+}
+
+.comment-list .remove {
+  border: none;
+  background: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.comment-list .empty {
+  color: var(--fg-muted);
+  font-size: 13px;
+  padding: 4px 2px;
+}
+
 /* 상태 메시지 */
 .status {
   position: fixed;
   left: 50%;
   bottom: 20px;
   transform: translateX(-50%) translateY(8px);
-  background-color: var(--fg);
-  color: #fff;
+  background-color: var(--status-bg);
+  color: var(--status-fg);
   padding: 8px 14px;
   border-radius: 6px;
   font-size: 13px;
