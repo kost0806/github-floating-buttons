@@ -77,7 +77,7 @@
   function actionPrList() {
     const ctx = getRepoContext();
     if (!ctx) {
-      showToast("레포지토리 페이지에서만 사용할 수 있어요.");
+      showToast(GFB.t("toastRepoOnly"));
       return;
     }
     location.assign(`${location.origin}/${ctx.owner}/${ctx.repo}/pulls`);
@@ -94,7 +94,7 @@
   async function actionReviewApprove() {
     const pull = getPullContext();
     if (!pull) {
-      showToast("Pull Request 페이지에서만 사용할 수 있어요.");
+      showToast(GFB.t("toastPrOnly"));
       return;
     }
     if (!isFilesTab()) {
@@ -133,7 +133,7 @@
     // 1. 리뷰 팝오버 열기
     const reviewBtn = await waitFor(GFB.SELECTORS.reviewButton, 6000);
     if (!reviewBtn) {
-      showToast("리뷰 버튼을 찾지 못했어요. GitHub 페이지 구조가 바뀌었을 수 있어요.");
+      showToast(GFB.t("toastReviewBtnNotFound"));
       return;
     }
     // <details>/<summary> 형태면 부모 details 를 열고, 아니면 클릭.
@@ -147,7 +147,7 @@
     // 2. Approve 라디오 선택
     const approveRadio = await waitFor(GFB.SELECTORS.approveRadio, 4000);
     if (!approveRadio) {
-      showToast("Approve 옵션을 찾지 못했어요. 리뷰창만 열어둘게요.");
+      showToast(GFB.t("toastApproveRadioNotFound"));
       return;
     }
     approveRadio.checked = true;
@@ -160,18 +160,19 @@
 
     // 3. 자동 approve: 코멘트 입력 후 제출
     const body = GFB.queryFirst(GFB.SELECTORS.reviewBody);
-    if (body && settings.approveComment) {
-      body.value = settings.approveComment;
+    const comment = GFB.pickRandom(settings.approveComments);
+    if (body && comment) {
+      body.value = comment;
       body.dispatchEvent(new Event("input", { bubbles: true }));
     }
     const submit = GFB.queryFirst(GFB.SELECTORS.submitButton);
     if (!submit) {
-      showToast("제출 버튼을 찾지 못했어요. 수동으로 제출해주세요.");
+      showToast(GFB.t("toastSubmitNotFound"));
       return;
     }
     submit.disabled = false;
     submit.click();
-    showToast("Approve 리뷰를 제출했어요.");
+    showToast(GFB.t("toastApproveSubmitted"));
   }
 
   /** Files 탭 진입 시 보류 중인 리뷰 동작을 재개. */
@@ -192,11 +193,86 @@
     await performReview();
   }
 
+  /** PR 페이지에서 병합 전략을 선택하고 Merge 버튼을 클릭한다. */
+  async function actionMerge(strategySelectors, labelKey) {
+    const pull = getPullContext();
+    if (!pull) {
+      showToast(GFB.t("toastPrOnly"));
+      return;
+    }
+
+    const label = GFB.t(labelKey);
+    if (!window.confirm(GFB.t("confirmMerge")(label))) return;
+
+    // 전략 드롭다운이 있으면 먼저 열고, 그 다음 옵션을 waitFor로 폴링
+    const strategyDropdown = GFB.queryFirst(GFB.SELECTORS.mergeStrategyDropdown);
+    if (strategyDropdown) {
+      const details = strategyDropdown.closest("details");
+      if (details && !details.open) strategyDropdown.click();
+
+      const strategyOption = await waitFor(strategySelectors, 2000);
+      if (!strategyOption) {
+        showToast(GFB.t("toastMergeStrategyNotFound"));
+        return;
+      }
+      // 드롭다운에서 전략 선택 (UI만 변경, 아직 병합 아님)
+      strategyOption.click();
+      await new Promise((r) => setTimeout(r, 300));
+
+      // 전략 변경 후 첫 번째 클릭: 확인 폼(commit message) 열기
+      const primaryBtn = await waitFor(GFB.SELECTORS.mergeButton, 3000);
+      if (!primaryBtn) {
+        showToast(GFB.t("toastMergeBtnNotFound"));
+        return;
+      }
+      if (primaryBtn.disabled) {
+        showToast(GFB.t("toastMergeNotReady"));
+        return;
+      }
+      primaryBtn.click();
+      await new Promise((r) => setTimeout(r, 300));
+    } else {
+      // 드롭다운 없이 전략 버튼이 독립적으로 노출될 경우
+      // strategyOption 클릭이 곧 primary 버튼 첫 번째 클릭(확인 폼 열기)
+      const strategyOption = GFB.queryFirst(strategySelectors);
+      if (strategyOption) {
+        strategyOption.click();
+        await new Promise((r) => setTimeout(r, 200));
+      } else {
+        showToast(GFB.t("toastMergeStrategyUnavailable"));
+        return;
+      }
+    }
+
+    // 최종 확인 클릭: 실제 병합 완료
+    const mergeBtn = GFB.queryFirst(GFB.SELECTORS.mergeButton);
+    if (!mergeBtn) {
+      showToast(GFB.t("toastMergeBtnNotFound"));
+      return;
+    }
+    if (mergeBtn.disabled) {
+      showToast(GFB.t("toastMergeNotReady"));
+      return;
+    }
+    mergeBtn.click();
+    showToast(GFB.t("toastMergeRequested"));
+  }
+
+  function actionMergeCommit() {
+    return actionMerge(GFB.SELECTORS.mergeCommitOption, "btnMergeCommit");
+  }
+
+  function actionSquashMerge() {
+    return actionMerge(GFB.SELECTORS.squashMergeOption, "btnSquashMerge");
+  }
+
   const ACTIONS = {
     "pr-list": actionPrList,
     "scroll-top": actionScrollTop,
     "scroll-bottom": actionScrollBottom,
-    "review-approve": actionReviewApprove
+    "review-approve": actionReviewApprove,
+    "merge-commit": actionMergeCommit,
+    "squash-merge": actionSquashMerge
   };
 
   /* ----------------------------- 렌더링 ----------------------------- */
@@ -232,27 +308,27 @@
     const container = document.createElement("div");
     container.id = CONTAINER_ID;
 
-    // 그룹별로 묶어서 렌더링
-    let i = 0;
-    while (i < enabled.length) {
-      const item = enabled[i];
+    // 그룹 멤버를 미리 수집 (순서 무관하게 같은 group끼리 묶음)
+    const groupDefs = new Map(); // group → [def, ...]
+    for (const item of enabled) {
       const def = buttonDef(item.id);
-      if (!def) { i++; continue; }
+      if (!def || !def.group) continue;
+      if (!groupDefs.has(def.group)) groupDefs.set(def.group, []);
+      groupDefs.get(def.group).push(def);
+    }
 
-      // 같은 group에 속하는 연속된 버튼들을 수집
+    const renderedGroups = new Set();
+
+    for (const item of enabled) {
+      const def = buttonDef(item.id);
+      if (!def) continue;
+
       if (def.group) {
-        const groupItems = [];
-        while (i < enabled.length) {
-          const d = buttonDef(enabled[i].id);
-          if (d && d.group === def.group) {
-            groupItems.push(d);
-            i++;
-          } else {
-            break;
-          }
-        }
+        if (renderedGroups.has(def.group)) continue; // 이미 렌더링됨
+        renderedGroups.add(def.group);
+        const groupItems = groupDefs.get(def.group);
+
         if (groupItems.length === 1) {
-          // 하나만 enabled이면 독립 버튼으로
           const btn = makeBtn(groupItems[0]);
           btn.className = "gfb-btn";
           container.appendChild(btn);
@@ -276,7 +352,6 @@
         const btn = makeBtn(def);
         btn.className = "gfb-btn";
         container.appendChild(btn);
-        i++;
       }
     }
 
@@ -285,6 +360,7 @@
 
   async function rerender() {
     const settings = await GFB.getSettings();
+    GFB.setLang(settings.language);
     render(settings);
   }
 
