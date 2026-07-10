@@ -88,7 +88,15 @@
       hintLanguage: "설정 페이지 및 알림 메시지에 사용할 언어를 선택해요.",
       langAuto: "브라우저 설정 (자동)",
       langKo: "한국어",
-      langEn: "English"
+      langEn: "English",
+      btnMergeCommit: "Merge commit으로 병합",
+      btnSquashMerge: "Squash merge로 병합",
+      confirmMerge: (label) => `이 PR을 ${label}으로 병합할까요?`,
+      toastMergeStrategyNotFound: "병합 전략 옵션을 찾지 못했어요. GitHub 페이지 구조가 바뀌었을 수 있어요.",
+      toastMergeStrategyUnavailable: "병합 전략을 선택할 수 없어요. 레포지토리 설정을 확인해주세요.",
+      toastMergeBtnNotFound: "Merge 버튼을 찾지 못했어요. PR이 이미 병합됐거나 병합할 수 없는 상태일 수 있어요.",
+      toastMergeNotReady: "병합할 수 없는 상태예요 (Draft, 충돌, 브랜치 보호 등).",
+      toastMergeRequested: "병합을 요청했어요."
     },
     en: {
       btnPrList: "Go to Pull Request list",
@@ -137,7 +145,15 @@
       hintLanguage: "Choose the language for the settings page and notification messages.",
       langAuto: "Browser default (auto)",
       langKo: "한국어",
-      langEn: "English"
+      langEn: "English",
+      btnMergeCommit: "Merge via merge commit",
+      btnSquashMerge: "Merge via squash",
+      confirmMerge: (label) => `Merge this PR via ${label}?`,
+      toastMergeStrategyNotFound: "Merge strategy option not found. GitHub's page structure may have changed.",
+      toastMergeStrategyUnavailable: "Cannot select a merge strategy. Check the repository settings.",
+      toastMergeBtnNotFound: "Merge button not found. The PR may already be merged or cannot be merged.",
+      toastMergeNotReady: "Cannot merge (Draft, conflict, branch protection, etc.).",
+      toastMergeRequested: "Merge requested."
     }
   };
 
@@ -180,7 +196,7 @@
     },
     {
       id: "merge-commit",
-      label: "Merge commit으로 병합",
+      get label() { return t("btnMergeCommit"); },
       defaultEnabled: false,
       // git merge icon
       icon:
@@ -189,7 +205,7 @@
     },
     {
       id: "squash-merge",
-      label: "Squash merge로 병합",
+      get label() { return t("btnSquashMerge"); },
       defaultEnabled: false,
       // compress/squash icon
       icon:

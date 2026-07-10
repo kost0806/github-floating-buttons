@@ -194,14 +194,15 @@
   }
 
   /** PR 페이지에서 병합 전략을 선택하고 Merge 버튼을 클릭한다. */
-  async function actionMerge(strategySelectors, label) {
+  async function actionMerge(strategySelectors, labelKey) {
     const pull = getPullContext();
     if (!pull) {
-      showToast("Pull Request 페이지에서만 사용할 수 있어요.");
+      showToast(GFB.t("toastPrOnly"));
       return;
     }
 
-    if (!window.confirm(`이 PR을 ${label}으로 병합할까요?`)) return;
+    const label = GFB.t(labelKey);
+    if (!window.confirm(GFB.t("confirmMerge")(label))) return;
 
     // 전략 드롭다운이 있으면 먼저 열고, 그 다음 옵션을 waitFor로 폴링
     const strategyDropdown = GFB.queryFirst(GFB.SELECTORS.mergeStrategyDropdown);
@@ -211,7 +212,7 @@
 
       const strategyOption = await waitFor(strategySelectors, 2000);
       if (!strategyOption) {
-        showToast("병합 전략 옵션을 찾지 못했어요. GitHub 페이지 구조가 바뀌었을 수 있어요.");
+        showToast(GFB.t("toastMergeStrategyNotFound"));
         return;
       }
       strategyOption.click();
@@ -223,8 +224,7 @@
         strategyOption.click();
         await new Promise((r) => setTimeout(r, 200));
       } else {
-        // 전략을 선택할 수단이 없으면 현재 선택된 전략으로 진행하지 않고 중단
-        showToast("병합 전략을 선택할 수 없어요. 레포지토리 설정을 확인해주세요.");
+        showToast(GFB.t("toastMergeStrategyUnavailable"));
         return;
       }
     }
@@ -232,23 +232,23 @@
     // 메인 병합 버튼 클릭
     const mergeBtn = GFB.queryFirst(GFB.SELECTORS.mergeButton);
     if (!mergeBtn) {
-      showToast("Merge 버튼을 찾지 못했어요. PR이 이미 병합됐거나 병합할 수 없는 상태일 수 있어요.");
+      showToast(GFB.t("toastMergeBtnNotFound"));
       return;
     }
     if (mergeBtn.disabled) {
-      showToast("병합할 수 없는 상태예요 (Draft, 충돌, 브랜치 보호 등).");
+      showToast(GFB.t("toastMergeNotReady"));
       return;
     }
     mergeBtn.click();
-    showToast("병합을 요청했어요.");
+    showToast(GFB.t("toastMergeRequested"));
   }
 
   function actionMergeCommit() {
-    return actionMerge(GFB.SELECTORS.mergeCommitOption, "Merge commit");
+    return actionMerge(GFB.SELECTORS.mergeCommitOption, "btnMergeCommit");
   }
 
   function actionSquashMerge() {
-    return actionMerge(GFB.SELECTORS.squashMergeOption, "Squash merge");
+    return actionMerge(GFB.SELECTORS.squashMergeOption, "btnSquashMerge");
   }
 
   const ACTIONS = {
