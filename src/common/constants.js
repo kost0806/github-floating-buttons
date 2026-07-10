@@ -266,6 +266,8 @@
     mergeButton: [
       ".js-merge-box-button-squash",
       ".js-merge-box-button-merge",
+      ".btn-group-squash",
+      ".btn-group-merge",
       ".js-merge-pr button[type=submit]",
       ".merge-pr button[type=submit]",
       "button.js-merge-commit-button",
