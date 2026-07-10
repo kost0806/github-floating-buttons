@@ -11,6 +11,7 @@
 
   const CONTAINER_ID = "gfb-container";
   const TOAST_ID = "gfb-toast";
+  const CONFIRM_ID = "gfb-confirm";
 
   // GitHub 의 레포가 아닌 예약된 1단계 경로들 (pr-list 판별용)
   const RESERVED_OWNERS = new Set([
@@ -52,6 +53,62 @@
     toastTimer = setTimeout(() => {
       toast.classList.remove("gfb-toast-show");
     }, 2600);
+  }
+
+  /* ------------------------- 커스텀 confirm ------------------------- */
+  function showCustomConfirm(anchorEl, message) {
+    return new Promise((resolve) => {
+      const existing = document.getElementById(CONFIRM_ID);
+      if (existing) existing.remove();
+
+      const box = document.createElement("div");
+      box.id = CONFIRM_ID;
+      box.setAttribute("role", "dialog");
+
+      const msg = document.createElement("p");
+      msg.className = "gfb-confirm-msg";
+      msg.textContent = message;
+
+      const actions = document.createElement("div");
+      actions.className = "gfb-confirm-actions";
+
+      const okBtn = document.createElement("button");
+      okBtn.type = "button";
+      okBtn.className = "gfb-confirm-ok";
+      okBtn.textContent = GFB.t("confirmOk");
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.type = "button";
+      cancelBtn.className = "gfb-confirm-cancel";
+      cancelBtn.textContent = GFB.t("confirmCancel");
+
+      actions.appendChild(cancelBtn);
+      actions.appendChild(okBtn);
+      box.appendChild(msg);
+      box.appendChild(actions);
+      document.body.appendChild(box);
+
+      // 버튼 왼쪽에 위치
+      const rect = anchorEl.getBoundingClientRect();
+      box.style.right = `${window.innerWidth - rect.left + 10}px`;
+      box.style.top = `${rect.top + rect.height / 2}px`;
+
+      function done(result) {
+        document.removeEventListener("click", outsideClick, true);
+        box.remove();
+        resolve(result);
+      }
+
+      okBtn.addEventListener("click", () => done(true));
+      cancelBtn.addEventListener("click", () => done(false));
+
+      function outsideClick(e) {
+        if (!box.contains(e.target) && e.target !== anchorEl) {
+          done(false);
+        }
+      }
+      setTimeout(() => document.addEventListener("click", outsideClick, true), 0);
+    });
   }
 
   /* --------------------------- 경로 유틸 --------------------------- */
@@ -194,7 +251,7 @@
   }
 
   /** PR 페이지에서 병합 전략을 선택하고 Merge 버튼을 클릭한다. */
-  async function actionMerge(strategySelectors, labelKey) {
+  async function actionMerge(strategySelectors, labelKey, anchorEl) {
     const pull = getPullContext();
     if (!pull) {
       showToast(GFB.t("toastPrOnly"));
@@ -202,7 +259,8 @@
     }
 
     const label = GFB.t(labelKey);
-    if (!window.confirm(GFB.t("confirmMerge")(label))) return;
+    const confirmed = await showCustomConfirm(anchorEl, GFB.t("confirmMerge")(label));
+    if (!confirmed) return;
 
     // 전략 드롭다운이 있으면 먼저 열고, 그 다음 옵션을 waitFor로 폴링
     const strategyDropdown = GFB.queryFirst(GFB.SELECTORS.mergeStrategyDropdown);
@@ -258,12 +316,12 @@
     showToast(GFB.t("toastMergeRequested"));
   }
 
-  function actionMergeCommit() {
-    return actionMerge(GFB.SELECTORS.mergeCommitOption, "btnMergeCommit");
+  function actionMergeCommit(anchorEl) {
+    return actionMerge(GFB.SELECTORS.mergeCommitOption, "btnMergeCommit", anchorEl);
   }
 
-  function actionSquashMerge() {
-    return actionMerge(GFB.SELECTORS.squashMergeOption, "btnSquashMerge");
+  function actionSquashMerge(anchorEl) {
+    return actionMerge(GFB.SELECTORS.squashMergeOption, "btnSquashMerge", anchorEl);
   }
 
   const ACTIONS = {
@@ -289,7 +347,7 @@
     btn.innerHTML = def.icon;
     btn.addEventListener("click", () => {
       const fn = ACTIONS[def.id];
-      if (fn) fn();
+      if (fn) fn(btn);
     });
     return btn;
   }
