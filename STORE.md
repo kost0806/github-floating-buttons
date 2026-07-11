@@ -28,15 +28,30 @@
 ### 상세 설명 (한국어)
 
 ```
-GitHub 및 GitHub Enterprise 페이지 우측 하단에 자주 쓰는 동작을 위한 floating
-버튼을 추가합니다.
+GitHub를 매일 쓰다 보면 반복되는 동작이 있습니다. PR 목록으로 돌아가기, 긴 파일의
+위아래로 이동하기, 리뷰 팝업 열고 Approve 클릭하기, PR 병합하기. GitHub Floating
+Buttons는 이런 동작을 페이지 우측 하단의 버튼으로 빠르게 처리할 수 있게 해줍니다.
 
-• Pull Request 목록으로 바로 가기
-• 페이지 맨 위로 스크롤
-• 현재 PR의 리뷰창 열기 (옵션: Approve 자동 선택/제출)
+■ 주요 기능
+• PR 목록으로 이동 — 현재 레포의 Pull Request 목록 페이지로 바로 이동합니다.
+• 맨 위/아래로 스크롤 — 어느 페이지에서든 부드럽게 최상단 또는 최하단으로 이동합니다.
+• 리뷰창 열기 — PR의 Files 탭에서 리뷰 팝오버를 자동으로 열고 Approve를 선택합니다.
+  (선택 사항) 자동 approve: 코멘트 입력 후 제출까지 한 번에 처리합니다. 여러
+  코멘트가 있으면 그중 하나를 무작위로 골라 입력합니다.
+• Merge commit — 확인 후 현재 PR을 merge commit 방식으로 병합합니다.
+• Squash merge — 확인 후 현재 PR을 squash 방식으로 병합합니다.
 
-각 버튼은 설정에서 켜고 끌 수 있고 순서를 바꿀 수 있습니다. GitHub Enterprise
-호스트는 직접 여러 개 등록할 수 있습니다. 외부로 전송되는 데이터가 전혀 없습니다.
+■ 자유롭게 커스텀
+• 각 버튼을 개별로 켜고 끌 수 있습니다.
+• 드래그하거나 ↑/↓ 버튼으로 순서를 바꿀 수 있습니다.
+• 설정 페이지와 알림 메시지의 언어를 한국어 또는 영어로 선택할 수 있습니다.
+
+■ GitHub Enterprise 지원
+• 설정 페이지에서 사내 GitHub Enterprise 호스트(예: github.mycompany.com)를 직접
+  추가할 수 있습니다.
+• 추가한 호스트에서도 동일한 버튼이 동작합니다.
+
+개인정보와 사용 데이터를 수집하거나 외부로 전송하지 않습니다.
 ```
 
 ### 상세 설명 (English)
@@ -46,18 +61,23 @@ Adds handy floating buttons to the bottom-right of GitHub and GitHub Enterprise
 pages.
 
 • Jump to the Pull Request list
-• Scroll to the top of the page
+• Smoothly scroll to the top or bottom of the page
 • Open the review panel of the current PR (optionally auto-select/submit Approve)
+• Merge the current PR with a merge commit after confirmation
+• Squash and merge the current PR after confirmation
 
-Each button can be toggled and reordered in settings. You can register your own
-GitHub Enterprise hosts. No data ever leaves your browser.
+Each button can be toggled and reordered in settings. Auto-approve can randomly
+pick from multiple saved comments. The settings page and notifications support
+Korean and English. You can also register your own GitHub Enterprise hosts. No
+data ever leaves your browser.
 ```
 
 ## Single Purpose (단일 목적)
 
 ```
-GitHub / GitHub Enterprise 페이지에서 자주 쓰는 동작(PR 목록 이동, 맨 위로 스크롤,
-현재 PR 리뷰창 열기/approve)을 위한 floating 버튼을 제공합니다.
+GitHub / GitHub Enterprise 페이지에서 자주 쓰는 동작(PR 목록 이동, 위아래 스크롤,
+현재 PR 리뷰/approve, merge commit 및 squash merge)을 위한 floating 버튼을
+제공합니다.
 ```
 
 ## 권한 정당화 (Permission justification)
