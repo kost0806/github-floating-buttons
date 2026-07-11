@@ -7,9 +7,8 @@
 ## 제출 전 체크리스트
 
 - [ ] Chrome Web Store 개발자 등록 ($5 1회 결제)
-- [ ] 제출용 zip 준비 — **릴리즈 워크플로 산출물** 사용
+- [ ] 제출용 zip 준비 — **릴리즈 워크플로 산출물** 사용 (_locales 포함)
       (`github-floating-buttons-vX.Y.Z.zip`, `manifest.json`이 zip 루트에 위치).
-      현재 `v0.0.1` 릴리즈의 zip이 그대로 업로드 가능합니다.
 - [ ] 아이콘 — 128×128 포함 (`icons/icon128.png`) ✓
 - [ ] 스크린샷 1장 이상 — **1280×800** 또는 640×400 (PNG/JPEG)
       예: GitHub PR 페이지 우측 하단 버튼 + 옵션 페이지
@@ -118,5 +117,3 @@ GitHub / GitHub Enterprise 페이지에서 자주 쓰는 동작(PR 목록 이동
 
 - broad optional 호스트 권한 때문에 심사에서 추가 질의가 올 수 있습니다. 위
   "Optional host permission" 정당화 문구로 답변하세요.
-- 확장 동작/기능 변경 없이 문서만 추가되었으므로, 현재 `v0.0.1` zip을 그대로
-  제출할 수 있습니다.

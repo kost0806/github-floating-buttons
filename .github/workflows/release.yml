@@ -48,7 +48,7 @@ jobs:
       - name: Package extension
         run: |
           zip -r "github-floating-buttons-${{ steps.ver.outputs.tag }}.zip" \
-            manifest.json src icons README.md
+            manifest.json _locales src icons README.md
 
       - name: Commit, tag and push
         run: |
