@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "GitHub Floating Buttons",
+  "name": "__MSG_extensionName__",
   "version": "0.0.4",
-  "description": "GitHub / GitHub Enterprise 페이지 우측 하단에 유용한 floating 버튼을 추가합니다 (PR 목록, 맨 위로 스크롤, 리뷰창 열기/자동 approve).",
+  "description": "__MSG_extensionDescription__",
+  "default_locale": "en",
   "permissions": [
     "storage",
     "scripting"
@@ -33,7 +34,7 @@
   ],
   "options_page": "src/options/options.html",
   "action": {
-    "default_title": "GitHub Floating Buttons 설정"
+    "default_title": "__MSG_actionTitle__"
   },
   "icons": {
     "16": "icons/icon16.png",

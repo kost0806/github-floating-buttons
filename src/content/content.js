@@ -314,7 +314,7 @@
     }
 
     const label = GFB.t(labelKey);
-    const confirmed = await showCustomConfirm(anchorEl, GFB.t("confirmMerge")(label));
+    const confirmed = await showCustomConfirm(anchorEl, GFB.t("confirmMerge", label));
     if (!confirmed) return;
 
     // 전략 드롭다운이 있으면 먼저 열고, 그 다음 옵션을 waitFor로 폴링
@@ -486,7 +486,6 @@
 
   async function rerender() {
     const settings = await GFB.getSettings();
-    GFB.setLang(settings.language);
     render(settings);
   }
 

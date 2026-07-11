@@ -294,7 +294,7 @@
     input.value = "";
     renderHosts();
     notifyBackgroundSync();
-    showStatus(GFB.t("hostAdded")(host));
+    showStatus(GFB.t("hostAdded", host));
   }
 
   async function removeHost(host) {
@@ -307,7 +307,7 @@
     );
     renderHosts();
     notifyBackgroundSync();
-    showStatus(GFB.t("hostRemoved")(host));
+    showStatus(GFB.t("hostRemoved", host));
   }
 
   function notifyBackgroundSync() {
@@ -339,36 +339,17 @@
       if (typeof val === "string") el.placeholder = val;
     });
     document.title = GFB.t("pageTitle");
-    document.documentElement.lang = GFB.isKorean() ? "ko" : "en";
-  }
-
-  /* --------------------------- 언어 선택 --------------------------- */
-  function renderLanguage() {
-    const sel = $("#language-select");
-    sel.value = state.language;
-    sel.onchange = async () => {
-      state.language = sel.value;
-      GFB.setLang(state.language);
-      await persist();
-      // 언어가 바뀌면 UI 전체를 다시 그린다.
-      applyI18n();
-      renderButtonList();
-      renderReviewAction();
-      renderHosts();
-      renderLanguage();
-      showStatus(GFB.t("saved"));
-    };
+    document.documentElement.lang = chrome.i18n.getMessage("@@ui_locale").replace("_", "-");
+    document.documentElement.dir = chrome.i18n.getMessage("@@bidi_dir");
   }
 
   /* ------------------------------ 초기화 ----------------------------- */
   async function init() {
     state = await GFB.getSettings();
-    GFB.setLang(state.language);
     applyI18n();
     renderButtonList();
     renderReviewAction();
     renderHosts();
-    renderLanguage();
 
     $("#host-add-btn").addEventListener("click", addHost);
     $("#host-input").addEventListener("keydown", (e) => {

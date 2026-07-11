@@ -42,7 +42,8 @@ GitHub 및 GitHub Enterprise 페이지 **우측 하단**에 자주 쓰는 동작
 ## 구조
 
 ```
-manifest.json                  # MV3 매니페스트
+manifest.json                  # MV3 매니페스트 (i18n 메시지 참조)
+_locales/{en,ko}/messages.json # Chrome 네이티브 언어별 메시지 카탈로그
 src/
   common/constants.js          # 공유 상수/헬퍼 (globalThis.GFB)
   content/content.js           # floating 버튼 렌더 + 동작
