@@ -249,23 +249,27 @@
       'button[type="submit"].js-reviews-submit-button'
     ],
     mergeStrategyDropdown: [
+      'button[data-component="IconButton"][aria-haspopup="true"][data-variant="primary"]',
       ".merge-pr-select summary",
       'summary[data-target="merge-box.strategyButton"]',
       ".js-merge-commit-selector summary"
     ],
     mergeCommitOption: [
+      '[role="menuitemradio"][aria-keyshortcuts="c"]',
       'button[data-merge-type="merge_commit"]',
       'button[data-merge-type="merge"]',
       'button[value="merge"]'
     ],
     squashMergeOption: [
+      '[role="menuitemradio"][aria-keyshortcuts="s"]',
       'button[data-merge-type="squash"]',
       'button[value="squash"]'
     ],
     mergeButton: [
       "button.js-merge-commit-button",
       'button[data-target="merge-box.primaryCommitButton"]',
-      'button[type="submit"].js-merge-commit-button'
+      'button[type="submit"].js-merge-commit-button',
+      'button[data-component="Button"][data-variant="primary"]'
     ]
   };
 

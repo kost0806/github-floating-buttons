@@ -183,6 +183,61 @@
     });
   }
 
+  /** 숨겨진 병합 폼의 버튼을 제외하고 현재 사용자가 누를 수 있는 요소를 찾는다. */
+  function queryActionable(selectors, predicate) {
+    for (const selector of selectors) {
+      const elements = document.querySelectorAll(selector);
+      for (const el of elements) {
+        if (el.hidden || el.closest("[hidden], [aria-hidden='true']")) continue;
+        if (el.disabled || el.getAttribute("aria-disabled") === "true") continue;
+        if (el.getClientRects().length === 0) continue;
+        if (!predicate || predicate(el)) return el;
+      }
+    }
+    return null;
+  }
+
+  /** 조건을 만족하는 현재 표시 요소가 나타날 때까지 기다린다. */
+  function waitForActionable(selectors, timeout, predicate) {
+    const deadline = Date.now() + (timeout || 4000);
+    return new Promise((resolve) => {
+      const tick = () => {
+        const el = queryActionable(selectors, predicate);
+        if (el) return resolve(el);
+        if (Date.now() > deadline) return resolve(null);
+        setTimeout(tick, 120);
+      };
+      tick();
+    });
+  }
+
+  function buttonState(el) {
+    return [el.textContent.trim(), el.value || "", el.getAttribute("aria-label") || ""].join("|");
+  }
+
+  function isPrimerMergePrimary(el) {
+    if (!el.matches('button[data-component="Button"][data-variant="primary"]')) return false;
+    const group = el.closest('[data-component="ButtonGroup"]');
+    return !!(group && group.querySelector('button[aria-haspopup="true"]'));
+  }
+
+  function isMergeStrategyDropdown(el) {
+    if (!el.matches('button[data-component="IconButton"][aria-haspopup="true"]')) return true;
+    const group = el.closest('[data-component="ButtonGroup"]');
+    return !!(group && group.querySelector('button[data-component="Button"][data-variant="primary"]'));
+  }
+  function isMergePrimary(el) {
+    return el.matches("button.js-merge-commit-button, button[data-target='merge-box.primaryCommitButton']") ||
+      isPrimerMergePrimary(el);
+  }
+
+  function isMergeConfirmation(el, previousButton, previousState) {
+    if (el === previousButton && buttonState(el) === previousState) return false;
+    if (el.matches("button.js-merge-commit-button, button[data-target='merge-box.primaryCommitButton']")) return true;
+    return el.matches('button[data-component="Button"][data-variant="primary"]') &&
+      /^confirm\s+(?:squash\s+and\s+)?merge\b/i.test(el.textContent.trim());
+  }
+
   /** Files 탭에서 리뷰 팝오버를 열고, 설정에 따라 Approve/제출까지 수행. */
   async function performReview() {
     const settings = await GFB.getSettings();
@@ -263,12 +318,14 @@
     if (!confirmed) return;
 
     // 전략 드롭다운이 있으면 먼저 열고, 그 다음 옵션을 waitFor로 폴링
-    const strategyDropdown = GFB.queryFirst(GFB.SELECTORS.mergeStrategyDropdown);
+    const strategyDropdown = queryActionable(GFB.SELECTORS.mergeStrategyDropdown, isMergeStrategyDropdown);
     if (strategyDropdown) {
       const details = strategyDropdown.closest("details");
-      if (details && !details.open) strategyDropdown.click();
+      if (details ? !details.open : strategyDropdown.getAttribute("aria-expanded") !== "true") {
+        strategyDropdown.click();
+      }
 
-      const strategyOption = await waitFor(strategySelectors, 2000);
+      const strategyOption = await waitForActionable(strategySelectors, 2000);
       if (!strategyOption) {
         showToast(GFB.t("toastMergeStrategyNotFound"));
         return;
@@ -278,21 +335,32 @@
       await new Promise((r) => setTimeout(r, 300));
 
       // 전략 변경 후 첫 번째 클릭: 확인 폼(commit message) 열기
-      const primaryBtn = await waitFor(GFB.SELECTORS.mergeButton, 3000);
+      const primaryBtn = await waitForActionable(GFB.SELECTORS.mergeButton, 3000, isMergePrimary);
       if (!primaryBtn) {
         showToast(GFB.t("toastMergeBtnNotFound"));
         return;
       }
-      if (primaryBtn.disabled) {
-        showToast(GFB.t("toastMergeNotReady"));
+      const primaryState = buttonState(primaryBtn);
+      primaryBtn.click();
+
+      // GitHub는 이전 전략의 폼도 DOM에 남겨둔다. 실제로 표시된 확인 버튼이
+      // 나타나거나 같은 버튼이 확인 단계로 바뀔 때까지 기다린다.
+      const mergeBtn = await waitForActionable(
+        GFB.SELECTORS.mergeButton,
+        4000,
+        (candidate) => isMergeConfirmation(candidate, primaryBtn, primaryState)
+      );
+      if (!mergeBtn) {
+        showToast(GFB.t("toastMergeBtnNotFound"));
         return;
       }
-      primaryBtn.click();
-      await new Promise((r) => setTimeout(r, 300));
+      mergeBtn.click();
+      showToast(GFB.t("toastMergeRequested"));
+      return;
     } else {
       // 드롭다운 없이 전략 버튼이 독립적으로 노출될 경우
       // strategyOption 클릭이 곧 primary 버튼 첫 번째 클릭(확인 폼 열기)
-      const strategyOption = GFB.queryFirst(strategySelectors);
+      const strategyOption = queryActionable(strategySelectors);
       if (strategyOption) {
         strategyOption.click();
         await new Promise((r) => setTimeout(r, 200));
@@ -303,7 +371,7 @@
     }
 
     // 최종 확인 클릭: 실제 병합 완료
-    const mergeBtn = GFB.queryFirst(GFB.SELECTORS.mergeButton);
+    const mergeBtn = queryActionable(GFB.SELECTORS.mergeButton);
     if (!mergeBtn) {
       showToast(GFB.t("toastMergeBtnNotFound"));
       return;
