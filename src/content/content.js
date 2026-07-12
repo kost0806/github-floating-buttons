@@ -228,6 +228,8 @@
   }
   function isMergePrimary(el) {
     return el.matches("button.js-merge-commit-button, button[data-target='merge-box.primaryCommitButton']") ||
+      // GHES 클래식 merge box 의 1단계 버튼(커밋 메시지 폼 열기)
+      el.matches("button.btn-group-merge, button.btn-group-squash, button.btn-group-rebase") ||
       isPrimerMergePrimary(el);
   }
 
