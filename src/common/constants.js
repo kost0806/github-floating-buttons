@@ -103,7 +103,8 @@
       'button[data-component="IconButton"][aria-haspopup="true"][data-variant="primary"]',
       ".merge-pr-select summary",
       'summary[data-target="merge-box.strategyButton"]',
-      ".js-merge-commit-selector summary"
+      ".js-merge-commit-selector summary",
+      ".js-merge-method-menu-button"
     ],
     mergeCommitOption: [
       '[role="menuitemradio"][aria-keyshortcuts="c"]',
@@ -120,6 +121,9 @@
       "button.js-merge-commit-button",
       'button[data-target="merge-box.primaryCommitButton"]',
       'button[type="submit"].js-merge-commit-button',
+      "button.btn-group-merge",
+      "button.btn-group-squash",
+      "button.btn-group-rebase",
       'button[data-component="Button"][data-variant="primary"]'
     ]
   };
